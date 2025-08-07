@@ -1,7 +1,7 @@
-# products/forms.py
+# apps.products/forms.py
 from django import forms
-from products.models import Product
-from products.validators import FORBIDDEN_WORDS
+from apps.products.models import Product
+from apps.products.validators import FORBIDDEN_WORDS
 
 class ProductForm(forms.ModelForm):
     class Meta:

@@ -2,7 +2,7 @@
 import os
 import django
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "products")  # замените на путь к settings.py, если отличается
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config")  # замените на путь к settings.py, если отличается
 django.setup()
 
 from django.core.management import call_command
