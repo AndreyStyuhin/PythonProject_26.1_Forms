@@ -1,6 +1,6 @@
 # products/urls.py
 from django.urls import path
-from myproject.products.views import (
+from products.views import (
     ProductListView, ProductCreateView, ProductUpdateView, ProductDeleteView
 )
 
