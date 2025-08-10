@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Products</title>
+</head>
+<body>
+<h1>Product list</h1>
+<ul>
+    {% for product in object_list %}
+        <li>{{ product.name }}</li>
+    {% empty %}
+        <li>No products found</li>
+    {% endfor %}
+</ul>
+</body>
+</html>
