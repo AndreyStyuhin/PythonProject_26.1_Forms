@@ -1,5 +1,6 @@
 # config/urls.py
-from django.urls import path
+from django.contrib import admin
+from django.urls import path, include
 from products.views import (
     ProductListView, ProductCreateView, ProductUpdateView, ProductDeleteView
 )
@@ -9,4 +10,6 @@ urlpatterns = [
     path('create/', ProductCreateView.as_view(), name='product_create'),
     path('<int:pk>/update/', ProductUpdateView.as_view(), name='product_update'),
     path('<int:pk>/delete/', ProductDeleteView.as_view(), name='product_delete'),
+    path('auth/', include('users.urls')),
+    path('admin/', admin.site.urls),
 ]
