@@ -1,26 +1,30 @@
 # products/views.py
-from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from products.models import Product
-from products.forms import ProductForm
+from .models import Product
+
 
 class ProductListView(ListView):
     model = Product
     template_name = 'products/product_list.html'
+    context_object_name = 'products'
 
-class ProductCreateView(CreateView):
+
+class ProductCreateView(LoginRequiredMixin, CreateView):
     model = Product
-    form_class = ProductForm
+    fields = ['name', 'description', 'price', 'image']
     template_name = 'products/product_form.html'
-    success_url = reverse_lazy('product_list')
+    success_url = '/'
 
-class ProductUpdateView(UpdateView):
+
+class ProductUpdateView(LoginRequiredMixin, UpdateView):
     model = Product
-    form_class = ProductForm
+    fields = ['name', 'description', 'price', 'image']
     template_name = 'products/product_form.html'
-    success_url = reverse_lazy('product_list')
+    success_url = '/'
 
-class ProductDeleteView(DeleteView):
+
+class ProductDeleteView(LoginRequiredMixin, DeleteView):
     model = Product
     template_name = 'products/product_confirm_delete.html'
-    success_url = reverse_lazy('product_list')
+    success_url = '/'

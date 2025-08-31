@@ -1,16 +1,12 @@
+# users/views.py
 from django.contrib.auth import login
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
-from django.urls import reverse
-from django.views import View
-from .forms import RegisterForm
-from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
-from .forms import LoginForm
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from products.models import Product
+from django.views import View
+from django.contrib.auth.views import LoginView
+from .forms import RegisterForm, LoginForm
 
 
 class RegisterView(View):
@@ -24,14 +20,9 @@ class RegisterView(View):
         form = self.form_class(request.POST)
         if form.is_valid():
             user = form.save()
-
-            # Отправка приветственного письма
             self.send_welcome_email(user)
-
-            # Автоматический вход после регистрации
             login(request, user)
-            return redirect('home')  # Замените 'home' на ваш URL
-
+            return redirect('home')
         return render(request, self.template_name, {'form': form})
 
     def send_welcome_email(self, user):
@@ -53,35 +44,3 @@ class CustomLoginView(LoginView):
 
     def get_success_url(self):
         return reverse_lazy('home')
-
-
-class ProductListView(ListView):
-    model = Product
-    template_name = 'products/product_list.html'
-    context_object_name = 'products'
-
-    # Разрешаем доступ всем (анонимным и авторизованным)
-    # Ничего не меняем, так как это общедоступная страница
-
-
-class ProductCreateView(LoginRequiredMixin, CreateView):
-    model = Product
-    fields = ['name', 'description', 'price', 'image']
-    template_name = 'products/product_form.html'
-    success_url = '/'
-
-    # LoginRequiredMixin автоматически перенаправит
-    # анонимных пользователей на страницу входа
-
-
-class ProductUpdateView(LoginRequiredMixin, UpdateView):
-    model = Product
-    fields = ['name', 'description', 'price', 'image']
-    template_name = 'products/product_form.html'
-    success_url = '/'
-
-
-class ProductDeleteView(LoginRequiredMixin, DeleteView):
-    model = Product
-    template_name = 'products/product_confirm_delete.html'
-    success_url = '/'
