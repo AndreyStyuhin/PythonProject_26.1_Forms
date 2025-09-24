@@ -1,26 +1,26 @@
-<!-- products/templates/products/product_list.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Products</title>
-</head>
-<body>
-    <h1>Product list</h1>
+{% extends "base.html" %}
 
-    {% if user.is_authenticated %}
-        <a href="{% url 'products:product_create' %}">Add New Product</a>
-    {% endif %}
+{% block content %}
+  <h2>Список продуктов</h2>
+  <ul>
+    {% for product in object_list %}
+      <li>
+        {{ product.name }} — {{ product.price }} ₽
 
-    <ul>
-        {% for product in object_list %}
-            <li>
-                {{ product.name }}
-                {% if user.is_authenticated %}
-                    <a href="{% url 'products:product_update' product.pk %}">Edit</a> |
-                    <a href="{% url 'products:product_delete' product.pk %}">Delete</a>
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+        <!-- только владелец или модератор -->
+        {% if user.is_authenticated %}
+          {% if user == product.owner or perms.products.delete_product %}
+            | <a href="{% url 'products:product_update' product.pk %}">Редактировать</a>
+            | <a href="{% url 'products:product_delete' product.pk %}">Удалить</a>
+          {% endif %}
+        {% endif %}
+      </li>
+    {% empty %}
+      <li>Продуктов пока нет</li>
+    {% endfor %}
+  </ul>
+
+  {% if user.is_authenticated %}
+    <p><a href="{% url 'products:product_create' %}">Добавить новый продукт</a></p>
+  {% endif %}
+{% endblock %}

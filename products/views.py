@@ -1,6 +1,7 @@
-# products/views.py
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.core.exceptions import PermissionDenied
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Product
 
 
@@ -10,21 +11,45 @@ class ProductListView(ListView):
     context_object_name = 'products'
 
 
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = 'products/product_detail.html'
+    context_object_name = 'product'
+
+
 class ProductCreateView(LoginRequiredMixin, CreateView):
     model = Product
-    fields = ['name', 'description', 'price', 'image']
+    fields = ['name', 'description', 'price', 'image', 'status']
     template_name = 'products/product_form.html'
-    success_url = '/'
+    success_url = reverse_lazy('products:product_list')
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user  # назначаем владельца
+        return super().form_valid(form)
 
 
 class ProductUpdateView(LoginRequiredMixin, UpdateView):
     model = Product
-    fields = ['name', 'description', 'price', 'image']
+    fields = ['name', 'description', 'price', 'image', 'status']
     template_name = 'products/product_form.html'
-    success_url = '/'
+    success_url = reverse_lazy('products:product_list')
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        # только владелец может редактировать
+        if obj.owner != request.user:
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
 
 
 class ProductDeleteView(LoginRequiredMixin, DeleteView):
     model = Product
     template_name = 'products/product_confirm_delete.html'
-    success_url = '/'
+    success_url = reverse_lazy('products:product_list')
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        # владелец или модератор с правом "delete_product"
+        if obj.owner != request.user and not request.user.has_perm("products.delete_product"):
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
