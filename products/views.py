@@ -36,10 +36,19 @@ class ProductUpdateView(LoginRequiredMixin, UpdateView):
 
     def dispatch(self, request, *args, **kwargs):
         obj = self.get_object()
-        # только владелец может редактировать
-        if obj.owner != request.user:
+        # только владелец или модератор с правом can_unpublish_product может редактировать
+        if obj.owner != request.user and not request.user.has_perm("products.can_unpublish_product"):
             raise PermissionDenied
         return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        # Дополнительная проверка для изменения статуса опубликованного продукта
+        if (self.object.status == 'published' and
+            form.cleaned_data['status'] == 'draft' and
+            self.object.owner != self.request.user and
+            not self.request.user.has_perm("products.can_unpublish_product")):
+            raise PermissionDenied("Недостаточно прав для снятия с публикации")
+        return super().form_valid(form)
 
 
 class ProductDeleteView(LoginRequiredMixin, DeleteView):
