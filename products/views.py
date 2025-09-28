@@ -3,6 +3,11 @@ from django.core.exceptions import PermissionDenied
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Product
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.shortcuts import render
+from .services import get_products_by_category
+from django.core.cache import cache
 
 
 class ProductListView(ListView):
@@ -10,11 +15,25 @@ class ProductListView(ListView):
     template_name = 'products/product_list.html'
     context_object_name = 'products'
 
+    def get_queryset(self):
+        products = cache.get("all_products")
+        if not products:
+            products = Product.objects.all()
+            cache.set("all_products", products, 60 * 5)  # кешируем на 5 минут
+        return products
+
+
 
 class ProductDetailView(DetailView):
     model = Product
     template_name = 'products/product_detail.html'
     context_object_name = 'product'
+
+    # Кешируем страницу продукта на 5 минут
+    @method_decorator(cache_page(60 * 5))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
 
 
 class ProductCreateView(LoginRequiredMixin, CreateView):
@@ -62,3 +81,7 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
         if obj.owner != request.user and not request.user.has_perm("products.delete_product"):
             raise PermissionDenied
         return super().dispatch(request, *args, **kwargs)
+
+def products_by_category(request, category_name):
+    products = get_products_by_category(category_name)
+    return render(request, "products/products_by_category.html", {"products": products, "category": category_name})

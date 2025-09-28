@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Продукты в категории "{{ category }}"</h2>
+  <ul>
+    {% for product in products %}
+      <li>{{ product.name }} — {{ product.price }} ₽</li>
+    {% empty %}
+      <li>Нет продуктов в этой категории</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
