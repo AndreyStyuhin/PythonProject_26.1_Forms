@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Список продуктов</h2>
+  <ul>
+    {% for product in object_list %}
+      <li>
+        {{ product.name }} — {{ product.price }} ₽
+
+        <!-- только владелец или модератор -->
+        {% if user.is_authenticated %}
+          {% if user == product.owner or perms.products.delete_product %}
+            | <a href="{% url 'products:product_update' product.pk %}">Редактировать</a>
+            | <a href="{% url 'products:product_delete' product.pk %}">Удалить</a>
+          {% endif %}
+        {% endif %}
+      </li>
+    {% empty %}
+      <li>Продуктов пока нет</li>
+    {% endfor %}
+  </ul>
+
+  {% if user.is_authenticated %}
+    <p><a href="{% url 'products:product_create' %}">Добавить новый продукт</a></p>
+  {% endif %}
+{% endblock %}

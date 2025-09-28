@@ -1,4 +1,4 @@
-# products/forms.py
+# apps.products/forms.py
 from django import forms
 from products.models import Product
 from products.validators import FORBIDDEN_WORDS

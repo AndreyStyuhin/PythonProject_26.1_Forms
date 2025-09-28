@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>{{ product.name }}</h2>
+  <p>{{ product.description }}</p>
+  <p>Цена: {{ product.price }} ₽</p>
+  <p>Статус: {{ product.get_status_display }}</p>
+
+  {% if product.image %}
+    <img src="{{ product.image.url }}" alt="{{ product.name }}" width="200">
+  {% endif %}
+
+  <p>
+    {% if user.is_authenticated %}
+      {% if user == product.owner %}
+        <a href="{% url 'products:product_update' product.pk %}">Редактировать</a> |
+      {% endif %}
+      {% if user == product.owner or user.has_perm("products.delete_product") %}
+        <a href="{% url 'products:product_delete' product.pk %}">Удалить</a>
+      {% endif %}
+    {% endif %}
+  </p>
+
+  <p><a href="{% url 'products:product_list' %}">Назад к списку</a></p>
+{% endblock %}
