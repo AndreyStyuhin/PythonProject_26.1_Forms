@@ -143,6 +143,8 @@ DEFAULT_FROM_EMAIL = 'noreply@yourdomain.com'
 LOGIN_URL = '/auth/login/'  # URL страницы входа
 
 # Кеширование через Redis
+CACHE_ENABLED = True
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",

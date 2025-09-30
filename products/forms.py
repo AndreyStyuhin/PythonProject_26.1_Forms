@@ -53,3 +53,13 @@ class ProductForm(forms.ModelForm):
     def contains_forbidden_word(self, text):
         text_lower = text.lower()
         return any(word in text_lower for word in FORBIDDEN_WORDS)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        name = cleaned_data.get('name')
+        description = cleaned_data.get('description')
+
+        if name and description and name.lower() in description.lower():
+            raise forms.ValidationError("Название не должно содержаться в описании")
+
+        return cleaned_data

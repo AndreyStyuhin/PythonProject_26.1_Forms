@@ -19,8 +19,11 @@
       <li>Продуктов пока нет</li>
     {% endfor %}
   </ul>
+{% endblock %}
+
 
   {% if user.is_authenticated %}
-    <p><a href="{% url 'products:product_create' %}">Добавить новый продукт</a></p>
+    <a href="{% url 'products:product_create' %}">Добавить новый продукт</a>
+  {% else %}
+    <p><a href="{% url 'login' %}">Войдите</a> чтобы добавлять продукты</p>
   {% endif %}
-{% endblock %}
