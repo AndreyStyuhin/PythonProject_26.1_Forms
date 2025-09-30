@@ -2,12 +2,15 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+
+from config import settings
 from .models import Product
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.shortcuts import render
 from .services import get_products_by_category
 from django.core.cache import cache
+from django.http import Http404
 
 
 class ProductListView(ListView):
@@ -16,10 +19,14 @@ class ProductListView(ListView):
     context_object_name = 'products'
 
     def get_queryset(self):
-        products = cache.get("all_products")
+        if not getattr(settings, 'CACHE_ENABLED', True):
+            return Product.objects.all()
+
+        cache_key = "all_products"
+        products = cache.get(cache_key)
         if not products:
-            products = Product.objects.all()
-            cache.set("all_products", products, 60 * 5)  # кешируем на 5 минут
+            products = list(Product.objects.all()) # Конвертируем в list для кеширования
+            cache.set(cache_key, products, 60 * 5)  # кешируем на 5 минут
         return products
 
 
@@ -83,5 +90,11 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
         return super().dispatch(request, *args, **kwargs)
 
 def products_by_category(request, category_name):
-    products = get_products_by_category(category_name)
-    return render(request, "products/products_by_category.html", {"products": products, "category": category_name})
+    try:
+        products = get_products_by_category(category_name)
+        return render(request, "products/products_by_category.html", {
+            "products": products,
+            "category": category_name
+        })
+    except Exception as e:
+        raise Http404("Категория не найденв")
